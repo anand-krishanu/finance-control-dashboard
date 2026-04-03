@@ -19,6 +19,7 @@ import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -31,7 +32,7 @@ class FinancialRecordControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private ObjectMapper objectMapper = new ObjectMapper().findAndRegisterModules();
 
     @MockitoBean
     private FinancialRecordService recordService;
@@ -43,10 +44,16 @@ class FinancialRecordControllerTest {
     void createRecord_Returns200AndSavedRecord() throws Exception {
         FinancialRecord input = new FinancialRecord();
         input.setAmount(new BigDecimal("100.00"));
-        
+        input.setCategory("Food");
+        input.setType(com.financecontrol.model.RecordType.EXPENSE);
+        input.setDate(java.time.LocalDate.now());
+
         FinancialRecord saved = new FinancialRecord();
         saved.setId(1L);
         saved.setAmount(new BigDecimal("100.00"));
+        saved.setCategory("Food");
+        saved.setType(com.financecontrol.model.RecordType.EXPENSE);
+        saved.setDate(java.time.LocalDate.now());
 
         when(recordService.createRecord(any(FinancialRecord.class))).thenReturn(saved);
 
@@ -65,7 +72,7 @@ class FinancialRecordControllerTest {
         record.setAmount(new BigDecimal("50.00"));
         Page<FinancialRecord> page = new PageImpl<>(List.of(record));
 
-        when(recordService.getAllRecords(any(Pageable.class))).thenReturn(page);
+        when(recordService.getAllRecords(any(Pageable.class), isNull(), isNull(), isNull(), isNull())).thenReturn(page);
 
         mockMvc.perform(get("/api/records"))
                 .andExpect(status().isOk())
@@ -89,10 +96,16 @@ class FinancialRecordControllerTest {
     void updateRecord_Returns200AndUpdatedRecord() throws Exception {
         FinancialRecord input = new FinancialRecord();
         input.setAmount(new BigDecimal("200.00"));
+        input.setCategory("Gaming");
+        input.setType(com.financecontrol.model.RecordType.EXPENSE);
+        input.setDate(java.time.LocalDate.now());
 
         FinancialRecord updated = new FinancialRecord();
         updated.setId(1L);
         updated.setAmount(new BigDecimal("200.00"));
+        updated.setCategory("Gaming");
+        updated.setType(com.financecontrol.model.RecordType.EXPENSE);
+        updated.setDate(java.time.LocalDate.now());
 
         when(recordService.updateRecord(eq(1L), any(FinancialRecord.class))).thenReturn(updated);
 

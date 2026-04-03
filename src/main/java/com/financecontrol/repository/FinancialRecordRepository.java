@@ -22,6 +22,25 @@ public interface FinancialRecordRepository extends JpaRepository<FinancialRecord
      */
     Page<FinancialRecord> findByUserId(Long userId, Pageable pageable);
 
+    @Query("SELECT f FROM FinancialRecord f WHERE f.user.id = :userId " +
+           "AND (:startDate IS NULL OR f.date >= :startDate) " +
+           "AND (:endDate IS NULL OR f.date <= :endDate) " +
+           "AND (:category IS NULL OR f.category = :category) " +
+           "AND (:type IS NULL OR f.type = :type)")
+    Page<FinancialRecord> findFilteredRecords(@Param("userId") Long userId,
+                                              @Param("startDate") LocalDate startDate,
+                                              @Param("endDate") LocalDate endDate,
+                                              @Param("category") String category,
+                                              @Param("type") RecordType type,
+                                              Pageable pageable);
+
+    @Query("SELECT f.date AS date, f.type AS type, SUM(f.amount) AS totalAmount " +
+           "FROM FinancialRecord f " +
+           "WHERE f.user.id = :userId AND f.date >= :startDate " +
+           "GROUP BY f.date, f.type " +
+           "ORDER BY f.date ASC")
+    List<com.financecontrol.dto.TrendData> getTrendData(@Param("userId") Long userId, @Param("startDate") LocalDate startDate);
+
     /**
      * Does the math to add up all the cash we made.
      *

@@ -7,8 +7,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
+import com.financecontrol.model.RecordType;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -33,21 +36,30 @@ public class FinancialRecordController {
 
     /**
      * Grabs the records but cleanly packed into pages so it does not crash.
+     * Keeps sorting functionality and filters them.
      *
      * @param pageable pagination settings to keep it smooth
+     * @param startDate optional start date for filter
+     * @param endDate optional end date for filter
+     * @param category optional category
+     * @param type optional transaction type (INCOME/EXPENSE)
      * @return a single page of money records
      */
     @GetMapping
     public ResponseEntity<Page<FinancialRecord>> getAllRecords(
-            @PageableDefault(size = 20, sort = "date") Pageable pageable) {
-        return ResponseEntity.ok(recordService.getAllRecords(pageable));
+            @PageableDefault(size = 20, sort = "date") Pageable pageable,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(required = false) String category,
+            @RequestParam(required = false) RecordType type) {
+        return ResponseEntity.ok(recordService.getAllRecords(pageable, startDate, endDate, category, type));        
     }
 
     /**
-     * Finds exactly one record by its ID.
+     * Grabs a specific record by its ID.
      *
-     * @param id the unique number of the record
-     * @return the record you asked for
+     * @param id the ID of the record to fetch
+     * @return the matching record if it exists
      */
     @GetMapping("/{id}")
     public ResponseEntity<FinancialRecord> getRecordById(@PathVariable Long id) {

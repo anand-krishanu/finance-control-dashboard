@@ -1,6 +1,7 @@
 package com.financecontrol.service;
 
 import com.financecontrol.dto.DashboardSummary;
+import com.financecontrol.dto.TrendData;
 import com.financecontrol.model.User;
 import com.financecontrol.repository.FinancialRecordRepository;
 import com.financecontrol.repository.UserRepository;
@@ -9,8 +10,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-
+import java.math.BigDecimal;import java.time.LocalDate;
+import java.util.List;
 /**
  * Does the heavy lifting to figure out how much money we actually have.
  */
@@ -38,17 +39,21 @@ public class DashboardService {
      */
     public DashboardSummary getSummary() {
         log.info("Calculating dashboard summary logic started.");
-        
+
         Long userId = getCurrentUserId();
-        
+
         BigDecimal income = repository.getTotalIncome(userId);
         if (income == null) income = BigDecimal.ZERO;
-        
+
         BigDecimal expense = repository.getTotalExpense(userId);
         if (expense == null) expense = BigDecimal.ZERO;
 
         BigDecimal netBalance = income.subtract(expense);
+        
+        // Grab trends over the last 30 days
+        LocalDate thirtyDaysAgo = LocalDate.now().minusDays(30);
+        List<TrendData> trends = repository.getTrendData(userId, thirtyDaysAgo);
 
-        return new DashboardSummary(income, expense, netBalance);
+        return new DashboardSummary(income, expense, netBalance, trends);
     }
 }

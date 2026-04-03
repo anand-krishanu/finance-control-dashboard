@@ -33,7 +33,8 @@ class DashboardControllerTest {
         DashboardSummary mockSummary = new DashboardSummary(
                 new BigDecimal("5000.00"),
                 new BigDecimal("2000.00"),
-                new BigDecimal("3000.00")
+                new BigDecimal("3000.00"),
+                java.util.Collections.emptyList()
         );
         when(dashboardService.getSummary()).thenReturn(mockSummary);
 

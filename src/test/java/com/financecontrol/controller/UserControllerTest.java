@@ -39,10 +39,12 @@ class UserControllerTest {
         User userInput = new User();
         userInput.setUsername("testuser");
         userInput.setPassword("pass123");
+        userInput.setRole(com.financecontrol.model.Role.VIEWER);
 
         User savedUser = new User();
         savedUser.setId(1L);
         savedUser.setUsername("testuser");
+        savedUser.setRole(com.financecontrol.model.Role.VIEWER);
 
         when(userService.createUser(any(User.class))).thenReturn(savedUser);
 

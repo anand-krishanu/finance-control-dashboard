@@ -1,6 +1,7 @@
 package com.financecontrol.service;
 
 import com.financecontrol.model.FinancialRecord;
+import com.financecontrol.model.RecordType;
 import com.financecontrol.model.User;
 import com.financecontrol.repository.FinancialRecordRepository;
 import com.financecontrol.repository.UserRepository;
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -43,14 +45,18 @@ public class FinancialRecordService {
 
     /**
      * Grabs a specific chunk of records for the active user so we do not blow up the server memory.
+     * Includes filtering capabilities.
      *
      * @param pageable how many to grab and how to sort them
+     * @param startDate filter explicitly from this date 
+     * @param endDate filter explicitly to this date
+     * @param category filter by a specific category
+     * @param type filter if it's an INCOME or EXPENSE
      * @return a single page of money moves
      */
-    public Page<FinancialRecord> getAllRecords(Pageable pageable) {
-        return repository.findByUserId(getCurrentUser().getId(), pageable);
-    }
-
+    public Page<FinancialRecord> getAllRecords(Pageable pageable, LocalDate startDate, LocalDate endDate, String category, RecordType type) {
+        return repository.findFilteredRecords(getCurrentUser().getId(), startDate, endDate, category, type, pageable);
+    }     
     /**
      * Hunts down a single record using its database ID. Checks if the user actually owns it!
      *
